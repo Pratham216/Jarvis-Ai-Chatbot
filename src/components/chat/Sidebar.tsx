@@ -110,7 +110,6 @@ export default function Sidebar({
         {currentUser && (
           <div className="flex items-center gap-2 px-2 py-2 rounded-lg hover:bg-surface-2 transition-colors">
             <UserButton
-              afterSignOutUrl="/"
               appearance={{
                 elements: {
                   avatarBox: "size-7",
