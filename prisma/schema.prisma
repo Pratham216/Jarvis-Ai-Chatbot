@@ -1,0 +1,92 @@
+// Prisma schema — chatbot + inference logging
+// Docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client"
+  output   = "../src/generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+enum ConversationStatus {
+  active
+  cancelled
+  archived
+}
+
+enum MessageRole {
+  user
+  assistant
+  system
+}
+
+enum InferenceStatus {
+  success
+  error
+  cancelled
+}
+
+model Conversation {
+  id        String             @id @default(uuid()) @db.Uuid
+  title     String             @default("New conversation")
+  userId    String?            @map("user_id")
+  status    ConversationStatus @default(active)
+  createdAt DateTime           @default(now()) @map("created_at")
+  updatedAt DateTime           @updatedAt @map("updated_at")
+
+  messages       Message[]
+  inferenceLogs  InferenceLog[]
+
+  @@index([userId, updatedAt])
+  @@index([status, updatedAt])
+  @@map("conversations")
+}
+
+model Message {
+  id              String      @id @default(uuid()) @db.Uuid
+  conversationId  String      @map("conversation_id") @db.Uuid
+  role            MessageRole
+  content         String      @db.Text
+  redactedContent String?     @map("redacted_content") @db.Text
+  tokenCount      Int?        @map("token_count")
+  createdAt       DateTime    @default(now()) @map("created_at")
+
+  conversation Conversation   @relation(fields: [conversationId], references: [id], onDelete: Cascade)
+  logs         InferenceLog[]
+
+  @@index([conversationId, createdAt])
+  @@map("messages")
+}
+
+model InferenceLog {
+  id               String          @id @default(uuid()) @db.Uuid
+  requestId        String          @unique @map("request_id")
+  conversationId   String?         @map("conversation_id") @db.Uuid
+  messageId        String?         @map("message_id") @db.Uuid
+  provider         String
+  model            String
+  status           InferenceStatus
+  latencyMs        Int             @map("latency_ms")
+  ttftMs           Int?            @map("ttft_ms")
+  promptTokens     Int?            @map("prompt_tokens")
+  completionTokens Int?            @map("completion_tokens")
+  totalTokens      Int?            @map("total_tokens")
+  inputPreview     String?         @map("input_preview") @db.Text
+  outputPreview    String?         @map("output_preview") @db.Text
+  errorMessage     String?         @map("error_message") @db.Text
+  metadata         Json?
+  startedAt        DateTime        @map("started_at")
+  finishedAt       DateTime        @map("finished_at")
+  createdAt        DateTime        @default(now()) @map("created_at")
+
+  conversation Conversation? @relation(fields: [conversationId], references: [id], onDelete: SetNull)
+  message      Message?      @relation(fields: [messageId], references: [id], onDelete: SetNull)
+
+  @@index([conversationId, createdAt])
+  @@index([provider, model, createdAt])
+  @@index([status, createdAt])
+  @@index([createdAt])
+  @@map("inference_logs")
+}
