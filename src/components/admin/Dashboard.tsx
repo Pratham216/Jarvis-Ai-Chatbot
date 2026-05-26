@@ -268,10 +268,10 @@ function Card({ title, children }: { title: string; children: React.ReactNode })
   );
 }
 
-function fmtHour(ts: string) {
-  const d = new Date(ts);
+function fmtHour(ts: unknown) {
+  const d = new Date(String(ts));
   return `${d.getHours()}:00`;
 }
-function fmtFull(ts: string) {
-  return new Date(ts).toLocaleString();
+function fmtFull(ts: unknown) {
+  return new Date(String(ts)).toLocaleString();
 }
