@@ -17,20 +17,6 @@ services:
       timeout: 3s
       retries: 10
 
-  redis:
-    image: redis:7-alpine
-    container_name: chatbot-redis
-    restart: unless-stopped
-    ports:
-      - "6379:6379"
-    volumes:
-      - redisdata:/data
-    healthcheck:
-      test: ["CMD", "redis-cli", "ping"]
-      interval: 5s
-      timeout: 3s
-      retries: 10
-
   app:
     profiles: ["full"]
     build:
@@ -41,11 +27,8 @@ services:
     depends_on:
       postgres:
         condition: service_healthy
-      redis:
-        condition: service_healthy
     environment:
       DATABASE_URL: postgresql://postgres:postgres@postgres:5432/chatbot?schema=public
-      REDIS_URL: redis://redis:6379
       OPENROUTER_API_KEY: ${OPENROUTER_API_KEY}
       INGEST_BASE_URL: http://app:3000
       INGEST_SECRET: ${INGEST_SECRET:-dev-secret-change-me}
@@ -54,22 +37,5 @@ services:
       - "3000:3000"
     command: sh -c "npx prisma migrate deploy && node server.js"
 
-  worker:
-    profiles: ["full"]
-    build:
-      context: .
-      dockerfile: Dockerfile.worker
-    container_name: chatbot-worker
-    restart: unless-stopped
-    depends_on:
-      postgres:
-        condition: service_healthy
-      redis:
-        condition: service_healthy
-    environment:
-      DATABASE_URL: postgresql://postgres:postgres@postgres:5432/chatbot?schema=public
-      REDIS_URL: redis://redis:6379
-
 volumes:
   pgdata:
-  redisdata:

@@ -19,7 +19,7 @@ export default function Footer() {
           <a href="https://github.com" target="_blank" rel="noopener noreferrer" className="hover:text-white transition-colors">GitHub</a>
         </div>
         <p className="text-xs text-white/30">
-          Built with Next.js, Postgres, Redis & OpenRouter.
+          Built with Next.js, Postgres, Upstash QStash & OpenRouter.
         </p>
       </div>
     </footer>

@@ -28,7 +28,7 @@ const FEATURES = [
   {
     icon: Layers,
     title: "Async ingestion",
-    body: "Chat path never blocks on the log write. Redis-backed queue with idempotent upserts keyed by requestId — at-least-once delivery, exactly-once effects.",
+    body: "Chat path never blocks on the log write. QStash HTTP queue with idempotent upserts keyed by requestId — at-least-once delivery, exactly-once effects.",
   },
   {
     icon: Activity,
